@@ -10,7 +10,6 @@ import StarfieldScene from '@/three/scenes/StarfieldScene'
 import NebulaScene from '@/three/scenes/NebulaScene'
 import FragmentField from '@/three/scenes/FragmentField'
 import type BaseScene from '@/three/scenes/BaseScene'
-import { useAppStore } from '@/stores/app'
 import { useFrequencyStore } from '@/stores/frequency'
 import { storeToRefs } from 'pinia'
 
@@ -23,9 +22,7 @@ const props = defineProps<Props>()
 const container = ref<HTMLElement>()
 const manager = ref<ThreeManager | null>(null)
 const route = useRoute()
-const appStore = useAppStore()
 const frequencyStore = useFrequencyStore()
-const { currentPage } = storeToRefs(appStore)
 const { currentConfig } = storeToRefs(frequencyStore)
 
 // Get page name from route path
