@@ -52,7 +52,7 @@ jobs:
             git reset --hard origin/main
 
             # 构建并启动
-            docker-compose up -d --build
+            docker compose up -d --build
 
             # 清理
             docker image prune -f
