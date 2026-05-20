@@ -1,0 +1,14 @@
+node_modules
+.git
+.gitignore
+.vscode
+.idea
+*.log
+.env
+.env.*
+dist
+.DS_Store
+.playwright-mcp
+.claude
+coverage
+*.local

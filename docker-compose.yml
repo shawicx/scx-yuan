@@ -1,0 +1,22 @@
+version: '3.9'
+
+networks:
+  scx-network:
+    external: true
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scx-yuan-web
+    ports:
+      - "3372:80"
+    restart: unless-stopped
+    networks:
+      - scx-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
