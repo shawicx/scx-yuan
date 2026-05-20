@@ -45,11 +45,23 @@ jobs:
           username: ${{ secrets.ECS_USER }}
           key: ${{ secrets.ECS_SSH_KEY }}
           script: |
+            # 初始化目录（首次）
+            if [ ! -d /opt/scx-yuan ]; then
+              mkdir -p /opt/scx-yuan
+            fi
+
+            # 初始化 git 仓库（首次）
             cd /opt/scx-yuan
+            if [ ! -d .git ]; then
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
 
             # 拉取最新代码
             git fetch origin
             git reset --hard origin/main
+
+            # 确保网络存在
+            docker network create scx-network 2>/dev/null || true
 
             # 构建并启动
             docker compose up -d --build
