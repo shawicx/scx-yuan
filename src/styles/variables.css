@@ -1,0 +1,50 @@
+:root {
+  /* Deep space background */
+  --color-space-900: #0a0e17;
+  --color-space-800: #151b2b;
+  --color-space-700: #1a2235;
+
+  /* Nebula colors */
+  --color-nebula-blue: #2d4a6f;
+  --color-nebula-purple: #3d2a5c;
+  --color-nebula-pink: #5c3a4a;
+
+  /* Moonlight and stars */
+  --color-moonlight: #e8eef5;
+  --color-star-white: #ffffff;
+
+  /* Neon accents */
+  --color-neon-cyan: #4deeea;
+  --color-neon-purple: #a855f7;
+
+  /* Text colors */
+  --color-text-primary: #e8eef5;
+  --color-text-secondary: rgba(232, 238, 245, 0.6);
+  --color-text-muted: rgba(232, 238, 245, 0.3);
+
+  /* Typography */
+  --font-display: 'Cormorant Garamond', 'Noto Serif SC', serif;
+  --font-body: 'Noto Serif SC', serif;
+  --font-mono: 'Space Mono', monospace;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 2rem;
+  --spacing-lg: 4rem;
+  --spacing-xl: 8rem;
+}
+
+/* Global reset for the theme */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-space-900);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
