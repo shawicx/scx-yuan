@@ -85,7 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useFrequencyStore } from '@/stores/frequency'
 import { storeToRefs } from 'pinia'
 
