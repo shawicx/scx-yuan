@@ -2,7 +2,7 @@
 <template>
   <div class="frequency-dial">
     <div ref="dialRef" class="dial-container">
-      <svg class="dial-svg" viewBox="0 0 200 200">
+      <svg class="dial-svg" viewBox="-30 -30 260 260">
         <!-- Outer ring -->
         <circle
           cx="100"
@@ -12,20 +12,66 @@
           stroke="rgba(232, 238, 245, 0.1)"
           stroke-width="2"
         />
-        <!-- Active arc -->
+
+        <!-- Frequency markers and labels -->
+        <g v-for="(freq, index) in frequencies" :key="freq" class="freq-group">
+          <!-- Clickable circle area (invisible) -->
+          <circle
+            :cx="getMarkerPosition(index).x"
+            :cy="getMarkerPosition(index).y"
+            r="25"
+            fill="transparent"
+            class="click-area"
+            @click="selectFrequency(index)"
+          />
+
+          <!-- Outer tick mark -->
+          <line
+            :x1="getTickPosition(index, 82).x"
+            :y1="getTickPosition(index, 82).y"
+            :x2="getTickPosition(index, 90).x"
+            :y2="getTickPosition(index, 90).y"
+            :class="['marker', { active: index === currentIndex }]"
+          />
+
+          <!-- Inner dot -->
+          <circle
+            :cx="getDotPosition(index).x"
+            :cy="getDotPosition(index).y"
+            r="4"
+            :class="['inner-dot', { active: index === currentIndex }]"
+          />
+
+          <!-- Frequency label -->
+          <text
+            :x="getLabelPosition(index).x"
+            :y="getLabelPosition(index).y"
+            :class="['freq-label', { active: index === currentIndex }]"
+            @click="selectFrequency(index)"
+          >
+            {{ freq }}
+          </text>
+        </g>
+
+        <!-- Center circle decoration -->
         <circle
           cx="100"
           cy="100"
-          r="90"
+          r="35"
           fill="none"
-          :stroke="currentConfig?.particleColor || 'var(--color-neon-cyan)'"
-          stroke-width="3"
-          :stroke-dasharray="arcLength"
-          :stroke-dashoffset="arcOffset"
-          transform="rotate(135 100 100)"
-          class="active-arc"
+          stroke="rgba(232, 238, 245, 0.05)"
+          stroke-width="1"
         />
-        <!-- Center display -->
+
+        <!-- Center display background -->
+        <circle
+          cx="100"
+          cy="100"
+          r="28"
+          fill="rgba(232, 238, 245, 0.02)"
+        />
+
+        <!-- Center frequency display -->
         <text x="100" y="95" text-anchor="middle" class="frequency-value">
           {{ currentFrequency }}
         </text>
@@ -34,94 +80,67 @@
         </text>
       </svg>
     </div>
-    <div class="dial-label">拖动调频</div>
+    <div class="dial-label">点击调频</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useFrequencyStore } from '@/stores/frequency'
 import { storeToRefs } from 'pinia'
 
 const frequencyStore = useFrequencyStore()
 const { currentFrequency, currentConfig, currentIndex } = storeToRefs(frequencyStore)
 
-const dialRef = ref<HTMLElement>()
-const isDragging = ref(false)
-const startY = ref(0)
+const frequencies = [87.8, 91.2, 95.6, 99.0] as const
 
-// Arc calculations
-const totalArc = 270 // degrees
-const circumference = 2 * Math.PI * 90
-const arcLength = computed(() => (circumference * totalArc) / 360)
-const arcOffset = computed(() => {
-  const totalChannels = 4 // Fixed number of frequency channels
-  const progress = currentIndex.value / (totalChannels - 1)
-  const visibleProgress = (progress * totalArc) / 360
-  return circumference * (1 - visibleProgress)
-})
+const centerX = 100
+const centerY = 100
 
-const handleStart = (y: number) => {
-  isDragging.value = true
-  startY.value = y
+// 4个频率位置：上、右、下、左
+const angles = [-90, 0, 90, 180] // degrees
+
+function toRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180
 }
 
-const handleMove = (y: number) => {
-  if (!isDragging.value) return
-
-  const deltaY = startY.value - y
-  const threshold = 30 // pixels to switch frequency
-
-  if (Math.abs(deltaY) > threshold) {
-    if (deltaY > 0) {
-      frequencyStore.prevFrequency()
-    } else {
-      frequencyStore.nextFrequency()
-    }
-    startY.value = y
+function getMarkerPosition(index: number) {
+  const angle = toRadians(angles[index])
+  return {
+    x: centerX + 90 * Math.cos(angle),
+    y: centerY + 90 * Math.sin(angle)
   }
 }
 
-const handleEnd = () => {
-  isDragging.value = false
+function getTickPosition(index: number, radius: number) {
+  const angle = toRadians(angles[index])
+  return {
+    x: centerX + radius * Math.cos(angle),
+    y: centerY + radius * Math.sin(angle)
+  }
 }
 
-// Mouse events
-const onMouseDown = (e: MouseEvent) => handleStart(e.clientY)
-const onMouseMove = (e: MouseEvent) => handleMove(e.clientY)
-const onMouseUp = () => handleEnd()
-
-// Touch events
-const onTouchStart = (e: TouchEvent) => handleStart(e.touches[0].clientY)
-const onTouchMove = (e: TouchEvent) => {
-  e.preventDefault()
-  handleMove(e.touches[0].clientY)
+function getDotPosition(index: number) {
+  const angle = toRadians(angles[index])
+  return {
+    x: centerX + 70 * Math.cos(angle),
+    y: centerY + 70 * Math.sin(angle)
+  }
 }
-const onTouchEnd = () => handleEnd()
 
-onMounted(() => {
-  const dial = dialRef.value
-  if (dial) {
-    dial.addEventListener('mousedown', onMouseDown)
-    dial.addEventListener('touchstart', onTouchStart, { passive: false })
+function getLabelPosition(index: number) {
+  const angle = toRadians(angles[index])
+  const labelRadius = 118
+  return {
+    x: centerX + labelRadius * Math.cos(angle),
+    y: centerY + labelRadius * Math.sin(angle) + 5
   }
-  document.addEventListener('mousemove', onMouseMove)
-  document.addEventListener('mouseup', onMouseUp)
-  document.addEventListener('touchmove', onTouchMove, { passive: false })
-  document.addEventListener('touchend', onTouchEnd)
-})
+}
 
-onUnmounted(() => {
-  const dial = dialRef.value
-  if (dial) {
-    dial.removeEventListener('mousedown', onMouseDown)
-    dial.removeEventListener('touchstart', onTouchStart)
-  }
-  document.removeEventListener('mousemove', onMouseMove)
-  document.removeEventListener('mouseup', onMouseUp)
-  document.removeEventListener('touchmove', onTouchMove)
-  document.removeEventListener('touchend', onTouchEnd)
-})
+function selectFrequency(index: number) {
+  console.log('Selecting frequency:', frequencies[index])
+  frequencyStore.setFrequency(frequencies[index])
+}
 </script>
 
 <style scoped>
@@ -133,14 +152,9 @@ onUnmounted(() => {
 }
 
 .dial-container {
-  width: 200px;
-  height: 200px;
-  cursor: grab;
+  width: 240px;
+  height: 240px;
   user-select: none;
-}
-
-.dial-container:active {
-  cursor: grabbing;
 }
 
 .dial-svg {
@@ -149,27 +163,76 @@ onUnmounted(() => {
   filter: drop-shadow(0 0 20px rgba(77, 238, 234, 0.2));
 }
 
-.active-arc {
-  transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+.click-area {
+  cursor: pointer;
+}
+
+.click-area:hover {
+  fill: rgba(255, 255, 255, 0.03);
+}
+
+.marker {
+  stroke: rgba(232, 238, 245, 0.2);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: all 0.3s ease;
+}
+
+.marker.active {
+  stroke: v-bind('currentConfig?.particleColor || "#4deeea"');
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px v-bind('currentConfig?.particleColor || "#4deeea"'));
+}
+
+.inner-dot {
+  fill: v-bind('currentConfig?.particleColor || "#4deeea"');
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.inner-dot.active {
+  opacity: 0.6;
+  filter: drop-shadow(0 0 4px v-bind('currentConfig?.particleColor || "#4deeea"'));
+}
+
+.freq-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.freq-label.active {
+  fill: v-bind('currentConfig?.particleColor || "#4deeea"');
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.freq-label:hover {
+  fill: var(--color-text-primary);
 }
 
 .frequency-value {
   font-family: var(--font-mono);
   font-size: 2rem;
-  font-weight: 400;
+  font-weight: 500;
   fill: var(--color-text-primary);
+  transition: fill 0.5s ease;
 }
 
 .frequency-unit {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   fill: var(--color-text-muted);
   letter-spacing: 0.1em;
 }
 
 .dial-label {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
   letter-spacing: 0.15em;
   text-transform: uppercase;

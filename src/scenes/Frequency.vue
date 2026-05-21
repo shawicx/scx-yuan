@@ -94,6 +94,9 @@ onMounted(async () => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
@@ -102,6 +105,9 @@ onMounted(async () => {
   gap: 3rem;
   padding: 2rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .frequency-container {
@@ -123,7 +129,6 @@ onMounted(async () => {
   border: 1px solid var(--color-neon-cyan);
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: auto;
 }
 
 .continue-btn:hover {

@@ -2,6 +2,7 @@ uniform float time;
 uniform vec3 color1;
 uniform vec3 color2;
 uniform float intensity;
+uniform float pulse;
 
 varying vec2 vUv;
 varying vec3 vPosition;
@@ -39,6 +40,7 @@ float snoise(vec2 v) {
 
 void main() {
   vec2 uv = vUv * 2.0 - 1.0;
+  float dist = length(uv);
 
   // Create flowing nebula effect
   float noise1 = snoise(uv * 1.5 + vec2(time * 0.1, time * 0.05));
@@ -55,7 +57,6 @@ void main() {
   color *= intensity;
 
   // Vignette
-  float dist = length(uv);
   float vignette = 1.0 - dist * 0.5;
   color *= vignette;
 
