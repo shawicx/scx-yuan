@@ -226,7 +226,7 @@ export default class NebulaScene extends BaseScene {
     this.flashIntensity = 1.0
   }
 
-  private updateBurstParticles(deltaTime: number): void {
+  private updateBurstParticles(_deltaTime: number): void {
     const delta = 0.016
 
     for (let i = this.burstParticles.length - 1; i >= 0; i--) {
@@ -244,13 +244,18 @@ export default class NebulaScene extends BaseScene {
       if (particle.life <= 0) {
         this.group.remove(particle.mesh)
         particle.mesh.geometry.dispose()
-        particle.mesh.material.dispose()
+        const mat = particle.mesh.material
+        if (Array.isArray(mat)) {
+          mat.forEach(m => m.dispose())
+        } else {
+          mat.dispose()
+        }
         this.burstParticles.splice(i, 1)
       }
     }
   }
 
-  private updateSubtleCameraShake(deltaTime: number): void {
+  private updateSubtleCameraShake(_deltaTime: number): void {
     if (this.cameraShake > 0) {
       const shake = this.cameraShake
       this.group.position.x = (Math.random() - 0.5) * shake
@@ -290,13 +295,23 @@ export default class NebulaScene extends BaseScene {
     for (const particle of this.burstParticles) {
       this.group.remove(particle.mesh)
       particle.mesh.geometry.dispose()
-      particle.mesh.material.dispose()
+      const mat = particle.mesh.material
+      if (Array.isArray(mat)) {
+        mat.forEach(m => m.dispose())
+      } else {
+        mat.dispose()
+      }
     }
     this.burstParticles = []
 
     if (this.ambientParticles) {
       this.ambientParticles.geometry.dispose()
-      this.ambientParticles.material.dispose()
+      const mat = this.ambientParticles.material
+      if (Array.isArray(mat)) {
+        mat.forEach(m => m.dispose())
+      } else {
+        mat.dispose()
+      }
     }
 
     if (this.mesh) {
